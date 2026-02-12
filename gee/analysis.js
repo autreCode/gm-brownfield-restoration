@@ -50,3 +50,23 @@ var distanceVis = {
 
 Map.addLayer(riverDistance, distanceVis, 'Distance to watercourses (m)', false);
 print('River distance raster:', riverDistance);
+
+// Load soil data - using OpenLandMap soil texture
+var soilTexture = ee.Image('OpenLandMap/SOL/SOL_TEXTURE-CLASS_USDA-TT_M/v02')
+  .select('b0')  // surface layer (0cm depth)
+  .clip(greaterManchester);
+
+// Soil texture classes (simplified):
+// 1-3 = Clay (low permeability, contaminants stay near surface)
+// 4-6 = Loam (medium permeability)
+// 7-12 = Sand (high permeability, contamination spreads to groundwater)
+
+// Visualize soil texture
+var soilVis = {
+  min: 1,
+  max: 12,
+  palette: ['8B4513', 'D2691E', 'F4A460', 'FFFF00']  // brown to yellow gradient
+};
+
+Map.addLayer(soilTexture, soilVis, 'Soil texture', false);
+print('Soil texture:', soilTexture);
