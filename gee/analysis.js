@@ -100,6 +100,19 @@ Map.addLayer(slope, slopeVis, 'Slope (degrees)', false);
 print('Elevation:', elevation);
 print('Slope:', slope);
 
+// ===== REFINE TO FOCUS ON VACANT BROWNFIELD =====
+// We want bare/sparse areas that are NEAR built-up zones (derelict former industrial)
+// not just any bare ground (which could be natural)
+
+// Calculate distance to built-up areas
+var builtUpDistance = builtUp.fastDistanceTransform().sqrt()
+  .multiply(ee.Image.pixelArea().sqrt());
+  
+// Create a "brownfield probability" mask:
+// Bare/sparse areas within 500m of built-up zones
+var brownfieldMask = bareSparse.and(builtUpDistance.lt(500));
+Map.addLayer(brownfieldMask.selfMask(), {palette: ['purple']}, 'Likely Brownfield Sites', false);
+
 // ===== RISK SCORING SYSTEM =====
 // Normalise each factor to 0-1 scale, then combine them
 
@@ -115,7 +128,8 @@ var soilRisk = soilTexture.divide(12);
 var slopeRisk = slope.divide(30).multiply(-1).add(1).clamp(0, 1);
 // 4. Land cover risk (built-up and bare areas = potential brownfield)
 // Create binary masks: 1 if built/bare, 0 otherwise
-var landcoverRisk = builtUp.or(bareSparse);
+// landcoverRisk only flags brownfield areas relating to "brownfield probability"
+var landcoverRisk = brownfieldMask;
 
 // ===== COMBINE RISK FACTORS =====
 // Equal weighting for now (can adjust later)

@@ -67,8 +67,16 @@ gm-brownfield-restoration/
 
 ## Next Steps
 
+**Phase 2: Export & R Analysis**
 1. Export risk score raster and zonal statistics from GEE
-2. Analyse results in R (district-level summaries, site rankings)
-3. Create polished map outputs in QGIS
-4. Build interactive web map (Python + Folium)
-5. Develop ML model for restoration suitability prediction
+2. R-based visualization (district summaries, site rankings)
+3. Statistical analysis of high-priority zones
+
+**Phase 3: Cartography**
+4. QGIS final map production with case studies
+5. Site-specific assessment examples
+
+**Phase 4: Python Extension & ML**
+6. Interactive Folium web map (stakeholder-facing: clickable sites with risk scores)
+7. Predictive model: restoration success probability based on site characteristics
+8. Model validation and 1-page stakeholder explainer
