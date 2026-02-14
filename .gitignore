@@ -1,0 +1,22 @@
+# Large raw datasets
+data/raw/brownfield*.csv
+data/raw/brownfield*.shp
+data/raw/brownfield*.shx
+data/raw/brownfield*.dbf
+data/raw/brownfield*.prj
+data/raw/brownfield*.cpg
+data/raw/*.geojson
+data/raw/*.tif
+
+# R temporary files
+.Rhistory
+.RData
+.Rproj.user
+
+# Python cache
+__pycache__/
+*.pyc
+
+# OS files
+.DS_Store
+Thumbs.db

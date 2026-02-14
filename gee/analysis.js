@@ -1,3 +1,9 @@
+/*
+Greater Manchester Brownfield Restoration Potential Analysis
+Calculates contamination risk scores for registered brownfield sites
+based on environmental factors: proximity to water, soil permeability, and terrain.
+*/
+
 // Define Greater Manchester boundary manually using approximate coordinates
 var greaterManchester = ee.Geometry.Rectangle([-2.7, 53.35, -1.95, 53.65]);
 
@@ -5,14 +11,24 @@ Map.centerObject(greaterManchester, 10);
 Map.addLayer(greaterManchester, {color: 'red'}, 'Greater Manchester box', false);
 print('Study area:', greaterManchester);
 
+// ===== IMPORT AND FILTER BROWNFIELD REGISTER DATA =====
+// Filter to Greater Manchester area only
+var brownfieldGM = table.filterBounds(greaterManchester);
+
+// Keep only sites still on the register (no end-date = not yet developed/remediated)
+brownfieldGM = brownfieldGM.filter(ee.Filter.or(
+  ee.Filter.eq('end-date', ''),
+  ee.Filter.eq('end-date', null)
+));
+
+// Visualise the filtered brownfield sites
+Map.addLayer(brownfieldGM, {color: 'purple'}, 'GM Brownfield Sites', true);
+
 // Load land cover data (ESA WorldCover 10m resolution)
 var landcover = ee.ImageCollection('ESA/WorldCover/v200')
   .filterBounds(greaterManchester)
   .first()
   .clip(greaterManchester);
-
-// Print land cover info
-print('Land cover:', landcover);
 
 // Display land cover with standard visualisation
 Map.addLayer(landcover, {}, 'Land Cover', false);
@@ -26,10 +42,6 @@ Map.addLayer(landcover, {}, 'Land Cover', false);
 // Create a mask for built-up areas
 var builtUp = landcover.eq(50);
 Map.addLayer(builtUp.selfMask(), {palette: ['red']}, 'Built-up areas', false);
-
-// Create a mask for bare/sparse areas (potential brownfield indicators)
-var bareSparse = landcover.eq(60);
-Map.addLayer(bareSparse.selfMask(), {palette: ['brown']}, 'Bare/sparse vegetation', false);
 
 // Load river/watercourse data (HydroSHEDS rivers dataset)
 var rivers = ee.FeatureCollection('WWF/HydroSHEDS/v1/FreeFlowingRivers')
@@ -49,7 +61,6 @@ var distanceVis = {
 };
 
 Map.addLayer(riverDistance, distanceVis, 'Distance to watercourses (m)', false);
-print('River distance raster:', riverDistance);
 
 // Load soil data - using OpenLandMap soil texture
 var soilTexture = ee.Image('OpenLandMap/SOL/SOL_TEXTURE-CLASS_USDA-TT_M/v02')
@@ -69,7 +80,6 @@ var soilVis = {
 };
 
 Map.addLayer(soilTexture, soilVis, 'Soil texture', false);
-print('Soil texture:', soilTexture);
 
 // Load elevation data (SRTM Digital Elevation Model - 30m resolution)
 var elevation = ee.Image('USGS/SRTMGL1_003')
@@ -97,52 +107,76 @@ var slopeVis = {
 
 Map.addLayer(slope, slopeVis, 'Slope (degrees)', false);
 
-print('Elevation:', elevation);
-print('Slope:', slope);
-
-// ===== REFINE TO FOCUS ON VACANT BROWNFIELD =====
-// We want bare/sparse areas that are NEAR built-up zones (derelict former industrial)
-// not just any bare ground (which could be natural)
-
-// Calculate distance to built-up areas
-var builtUpDistance = builtUp.fastDistanceTransform().sqrt()
-  .multiply(ee.Image.pixelArea().sqrt());
-  
-// Create a "brownfield probability" mask:
-// Bare/sparse areas within 500m of built-up zones
-var brownfieldMask = bareSparse.and(builtUpDistance.lt(500));
-Map.addLayer(brownfieldMask.selfMask(), {palette: ['purple']}, 'Likely Brownfield Sites', false);
-
-// ===== RISK SCORING SYSTEM =====
-// Normalise each factor to 0-1 scale, then combine them
+// ===== NORMALISE ENVIRONMENTAL LAYERS TO RISK SCORES =====
+// Convert raw environmental data to 0-1 risk scales
 
 // 1. Distance to water risk (closer = higher risk)
 // Invert so 0m = risk score 1, 5000m = risk score 0
 var waterRisk = riverDistance.divide(5000).multiply(-1).add(1).clamp(0, 1);
+
 // 2. Soil permeability risk (sandy soil = higher groundwater contamination risk)
 // Texture classes 1-12, where higher = sandier
-//Normalise to 0-1 scale
+// Normalise to 0-1 scale
 var soilRisk = soilTexture.divide(12);
-// 3. Slope risk (steeper = harder to remediate, but we'll invert: flatter = more likely industrial site)
+
+// 3. Slope risk (flatter = more likely industrial site, higher restoration feasibility)
 // Slopes in degrees (0-30), flatten = higher development probability
 var slopeRisk = slope.divide(30).multiply(-1).add(1).clamp(0, 1);
-// 4. Land cover risk (built-up and bare areas = potential brownfield)
-// Create binary masks: 1 if built/bare, 0 otherwise
-// landcoverRisk only flags brownfield areas relating to "brownfield probability"
-var landcoverRisk = brownfieldMask;
 
-// ===== COMBINE RISK FACTORS =====
-// Equal weighting for now (can adjust later)
-var totalRisk = waterRisk.add(soilRisk).add(slopeRisk).add(landcoverRisk);
-//Normalise total risk to 0-1 scale by dividing by number of factors (4)
-totalRisk = totalRisk.divide(4);
+// ===== CALCULATE RISK SCORES FOR BROWNFIELD SITES =====
+// Instead of creating a region-wide risk map, we'll sample environmental 
+// factors at each brownfield site location
 
-//Visualise the final risk score
-var riskVis = {
-  min: 0,
-  max: 1,
-  palette: ['green', 'yellow', 'orange', 'red']  // green = low risk, red = high priority
+// Function to extract environmental values at each point
+var addRiskFactors = function(feature) {
+  // Get the point geometry
+  var point = feature.geometry();
+  
+  // Sample environmental layers at this location (30m buffer for robustness)
+  var waterRiskValue = waterRisk.reduceRegion({
+    reducer: ee.Reducer.mean(),
+    geometry: point.buffer(30),
+    scale: 30
+  }).get('distance');
+  
+  var soilRiskValue = soilRisk.reduceRegion({
+    reducer: ee.Reducer.mean(),
+    geometry: point.buffer(30),
+    scale: 30
+  }).get('b0');
+  
+  var slopeRiskValue = slopeRisk.reduceRegion({
+    reducer: ee.Reducer.mean(),
+    geometry: point.buffer(30),
+    scale: 30
+  }).get('slope');
+  
+  // Calculate total risk (average of three factors, 0-1 scale)
+  var totalRisk = ee.Number(waterRiskValue).add(soilRiskValue).add(slopeRiskValue).divide(3);
+  
+  // Add risk scores as properties to the feature
+  return feature.set({
+    'water_risk': waterRiskValue,
+    'soil_risk': soilRiskValue,
+    'slope_risk': slopeRiskValue,
+    'total_risk': totalRisk
+  });
 };
 
-Map.addLayer(totalRisk, riskVis, 'Contamination Risk Score', true);
-print('Total risk score:', totalRisk);
+// Apply the function to all brownfield sites
+var brownfieldWithRisk = brownfieldGM.map(addRiskFactors);
+
+// Visualise sites coloured by total risk score
+var riskPalette = ['green', 'yellow', 'orange', 'red'];
+Map.addLayer(brownfieldWithRisk, {}, 'Brownfield Sites (coloured by risk)', false);
+
+// ===== EXPORT RESULTS =====
+// Export the brownfield sites with risk scores to Google Drive as CSV
+Export.table.toDrive({
+  collection: brownfieldWithRisk,
+  description: 'GM_brownfield_risk_scores',
+  fileFormat: 'CSV',
+  selectors: ['reference', 'name', 'site-addre', 'hectares', 
+              'ownership-', 'planning_2', 'water_risk', 'soil_risk', 
+              'slope_risk', 'total_risk']
+});

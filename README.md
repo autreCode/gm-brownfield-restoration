@@ -28,10 +28,13 @@ High-risk sites are prioritised for ecological assessment and nature-based resto
 
 ## Project Status
 
-**Phase 1: GEE Foundation (Complete)**
-- ✅ Study area definition (Greater Manchester)
-- ✅ Environmental data layers integrated
-- ✅ Composite contamination risk score generated
+**Phase 1: GEE Foundation ✅ COMPLETE**
+- ✅ Study area definition (Greater Manchester bounding box)
+- ✅ UK brownfield register imported (1,583 active sites in GM)
+- ✅ Environmental data layers: land cover, watercourses, soil permeability, terrain
+- ✅ Composite contamination risk score (water proximity + soil + slope)
+- ✅ Risk scores calculated for all brownfield sites
+- ✅ Data exported to CSV for analysis
 
 **Phase 2: Export & Analysis (In Progress)**
 - Export risk raster and statistics
@@ -65,18 +68,35 @@ gm-brownfield-restoration/
     └── maps/
 ```
 
+## Key Findings (Preliminary)
+
+- **2,527 brownfield sites** identified within Greater Manchester bounding box
+- **1,583 sites** remain on the active register (not yet developed/remediated)
+- Risk scores range from low (rural, elevated sites far from water) to high (urban, flat sites near watercourses)
+- Example high-risk site: Bolton Urban Village (risk score 0.81) — flat terrain, very close to river, medium-permeable soil
+
+*Full statistical analysis pending R phase*
+
 ## Next Steps
 
 **Phase 2: Export & R Analysis**
+
 1. Export risk score raster and zonal statistics from GEE
+
 2. R-based visualisation (district summaries, site rankings)
+
 3. Statistical analysis of high-priority zones
 
 **Phase 3: Cartography**
+
 4. QGIS final map production with case studies
+
 5. Site-specific assessment examples
 
 **Phase 4: Python Extension & ML**
+
 6. Interactive Folium web map (stakeholder-facing: clickable sites with risk scores)
+
 7. Predictive model: restoration success probability based on site characteristics
+
 8. Model validation and 1-page stakeholder explainer
