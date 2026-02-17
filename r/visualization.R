@@ -141,3 +141,56 @@ ggsave(
 )
 
 print("All plots saved successfully")
+
+# ===== TOP 10 HIGHEST RISK SITES =====
+top10 <- brownfield_clean %>%
+  arrange(desc(total_risk)) %>%
+  slice(1:10) %>%
+  select(reference, site.addre, hectares, water_risk, soil_risk, slope_risk, total_risk) %>%
+  mutate(
+    across(where(is.numeric), ~ round(., 3)),
+    hectares = round(hectares, 2)
+  )
+
+print(top10)
+
+# Save as CSV for use in QGIS and report
+write.csv(top10, 
+          "../outputs/figures/top10_highest_risk_sites.csv", 
+          row.names = FALSE)
+
+# Top 10 sites horizontal bar chart
+top10_chart <- ggplot(top10, aes(x = total_risk, 
+                                 y = reorder(stringr::str_trunc(site.addre, 50), total_risk),
+                                 fill = total_risk)) +
+  geom_col(width = 0.7) +
+  geom_text(aes(label = round(total_risk, 3)), 
+            hjust = -0.1, 
+            size = 3.5,
+            fontface = "bold") +
+  scale_fill_gradient(low = "#F5CBA7", high = "#C0392B") +
+  scale_x_continuous(expand = c(0, 0)) +
+  coord_cartesian(xlim = c(0.85, 0.91)) +
+  labs(
+    title = "Top 10 Highest Risk Brownfield Sites",
+    subtitle = "Greater Manchester — ranked by composite environmental risk score\nNote: x-axis starts at 0.85 to show variation between closely-scored sites",
+    x = "Total Risk Score",
+    y = NULL
+  ) +
+  theme(
+    plot.title = element_text(hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5),
+    legend.position = "none",
+    plot.margin = margin(t = 10, r = 30, b = 10, l = 10),
+    axis.text.y = element_text(size = 9)
+  )
+
+print(top10_chart)
+
+ggsave(
+  filename = "../outputs/figures/top10_risk_sites.png",
+  plot = top10_chart,
+  width = 12,
+  height = 7,
+  dpi = 300
+)
