@@ -194,3 +194,21 @@ ggsave(
   height = 7,
   dpi = 300
 )
+
+# ===== PREPARE DATA FOR QGIS =====
+library(sf)
+
+# Load the shapefile (has geometry required for QGIS)
+brownfield_shp <- st_read("../assets/uk_brownfield.shp")
+
+# Join with our risk-categorised data
+# Match by reference ID
+brownfield_spatial <- brownfield_shp %>%
+  inner_join(brownfield_clean, by = "reference")
+
+# Export as GeoPackage for QGIS
+st_write(brownfield_spatial, 
+         "../outputs/maps/gm_brownfield_risk.gpkg",
+         delete_dsn = TRUE)
+
+print("GeoPackage created successfully for QGIS")
