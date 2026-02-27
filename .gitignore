@@ -20,3 +20,7 @@ __pycache__/
 # OS files
 .DS_Store
 Thumbs.db
+.DS_Store
+*.gpkg-shm
+*.gpkg-wal
+assets/
