@@ -28,24 +28,27 @@ High-risk sites are prioritised for ecological assessment and nature-based resto
 
 ## Project Status
 
-**Phase 1: GEE Foundation ✅ COMPLETE**
-- ✅ Study area definition (Greater Manchester bounding box)
-- ✅ UK brownfield register imported (1,583 active sites in GM)
-- ✅ Environmental data layers: land cover, watercourses, soil permeability, terrain
-- ✅ Composite contamination risk score (water proximity + soil + slope)
-- ✅ Risk scores calculated for all brownfield sites
-- ✅ Data exported to CSV for analysis
+**Phase 1: GEE Foundation COMPLETE**
+- Study area definition (Greater Manchester bounding box)
+- UK brownfield register imported (1,583 active sites in GM)
+- Environmental data layers: land cover, watercourses, soil permeability, terrain
+- Composite contamination risk score (water proximity + soil + slope)
+- Risk scores calculated for all brownfield sites
+- Data exported to CSV for analysis
 
-**Phase 2: Export & Analysis (In Progress)**
-- Export risk raster and statistics
-- R-based visualisation and site ranking
-- Summary statistics by district
+**Phase 2: R Analysis COMPLETE**
+- Risk score distribution analysis (1,582 sites)
+- Risk categorisation: 746 high, 764 medium, 72 low priority sites
+- Top 10 highest risk sites identified (Salford M5 area dominant)
+- 772 hectares of high-risk brownfield identified
+- Four publication-quality visualisations produced
 
-**Phase 3: Cartography (Planned)**
-- QGIS final map production
-- Site-specific case studies
+**Phase 3: QGIS Cartography COMPLETE**
+- Polished map with risk-categorized sites (green/orange/red)
+- Professional cartographic elements (legend, scale bar, north arrow, title)
+- High-resolution export (300 DPI) for portfolio and presentations
 
-**Phase 4: ML Extension (Planned)**
+**Phase 4: Python Extension & ML (In Progress)**
 - Predictive model for restoration success
 - Interactive Folium web map for stakeholders
 
@@ -78,20 +81,6 @@ gm-brownfield-restoration/
 *Full statistical analysis pending R phase*
 
 ## Next Steps
-
-**Phase 2: R Analysis COMPLETE**
-- Risk score distribution analysis (1,582 sites)
-- Risk categorisation: 746 high, 764 medium, 72 low priority sites
-- Top 10 highest risk sites identified (Salford M5 area dominant)
-- 772 hectares of high-risk brownfield identified
-- Four publication-quality visualisations produced
-
-**Phase 3: QGIS Cartography ✅ COMPLETE**
-- Polished map with risk-categorized sites (green/orange/red)
-- Professional cartographic elements (legend, scale bar, north arrow, title)
-- High-resolution export (300 DPI) for portfolio and presentations
-
-**Phase 4: Python Extension & ML (In Progress)**
 
 6. Interactive Folium web map (stakeholder-facing: clickable sites with risk scores)
 
