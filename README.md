@@ -86,13 +86,12 @@ gm-brownfield-restoration/
 - 772 hectares of high-risk brownfield identified
 - Four publication-quality visualisations produced
 
-**Phase 3: QGIS Cartography (In Progress)**
+**Phase 3: QGIS Cartography ✅ COMPLETE**
+- Polished map with risk-categorized sites (green/orange/red)
+- Professional cartographic elements (legend, scale bar, north arrow, title)
+- High-resolution export (300 DPI) for portfolio and presentations
 
-4. QGIS final map production with case studies
-
-5. Site-specific assessment examples
-
-**Phase 4: Python Extension & ML**
+**Phase 4: Python Extension & ML (In Progress)**
 
 6. Interactive Folium web map (stakeholder-facing: clickable sites with risk scores)
 
