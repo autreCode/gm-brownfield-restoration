@@ -27,7 +27,7 @@ m = folium.Map(
 
 # Add custom scale bar with better positioning and size
 scale = folium.plugins.MeasureControl(
-    position='bottomleft',
+    position='topleft',
     primary_length_unit='kilometers',
     secondary_length_unit='miles',
     primary_area_unit='sqkilometers',
@@ -92,8 +92,8 @@ folium.LayerControl(collapsed=False).add_to(m)
 recentre_script = f"""
 <div id="recentre-btn" style="
     position: fixed;
-    top: 80px;
-    left: 10px;
+    top: 10px;
+    left: 50px;
     z-index: 1000;
     background-color: white;
     border: 2px solid rgba(0,0,0,0.2);
@@ -125,6 +125,47 @@ setTimeout(function() {{
 """
 
 m.get_root().html.add_child(folium.Element(recentre_script))
+
+# Add title and description overlay
+title_html = f"""
+<div style="
+    position: fixed;
+    bottom: 20px;
+    right: 10px;
+    width: 350px;
+    background-color: white;
+    border: 2px solid rgba(0,0,0,0.2);
+    border-radius: 8px;
+    padding: 15px;
+    z-index: 1000;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+">
+    <h3 style="margin: 0 0 10px 0; color: #2C3E50;">Greater Manchester Brownfield Sites</h3>
+    <p style="margin: 0 0 8px 0; font-size: 13px; color: #555;">
+        Environmental risk assessment of {len(brownfield)} active brownfield sites.
+    </p>
+    <div style="font-size: 12px; color: #666; line-height: 1.6;">
+        <p style="margin: 5px 0;"><strong>Risk Factors:</strong></p>
+        <ul style="margin: 5px 0; padding-left: 20px;">
+            <li>Proximity to watercourses</li>
+            <li>Soil permeability</li>
+            <li>Terrain flatness</li>
+        </ul>
+        <p style="margin: 10px 0 5px 0;"><strong>Risk Categories:</strong></p>
+        <div style="display: flex; justify-content: space-between; margin-top: 5px;">
+            <span><span style="color: #E74C3C;">●</span> High: {(brownfield['risk_category'] == 'High').sum()} sites</span>
+            <span><span style="color: #F39C12;">●</span> Medium: {(brownfield['risk_category'] == 'Medium').sum()} sites</span>
+            <span><span style="color: #27AE60;">●</span> Low: {(brownfield['risk_category'] == 'Low').sum()} sites</span>
+        </div>
+    </div>
+    <p style="margin: 12px 0 0 0; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 8px;">
+        Click markers for site details | Toggle layers to filter by risk | Created by Daniel Crompton, 2026.
+    </p>
+</div>
+"""
+
+m.get_root().html.add_child(folium.Element(title_html))
 
 # Save the map
 output_path = "../outputs/maps/gm_brownfield_interactive.html"
