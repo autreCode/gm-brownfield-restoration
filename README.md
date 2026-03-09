@@ -42,7 +42,11 @@ gm-brownfield-restoration/
 - **Google Earth Engine** — satellite data processing, spatial analysis
 - **R** — statistical analysis, data visualisation (ggplot2, dplyr, sf)
 - **QGIS** — professional cartography and map layout
-- **Python** — interactive mapping (Folium, GeoPandas), ML modelling (scikit-learn)
+- **Python** — interactive mapping (Folium, GeoPandas), ML modelling:
+  - Python (pandas, geopandas, scikit-learn, matplotlib, seaborn)
+  - Random Forest classifier
+  - Train/test split with stratified sampling
+  - Feature engineering and importance analysis
 
 **Datasets:**
 - **UK Brownfield Land Register** — 1,585 active sites in Greater Manchester
@@ -70,10 +74,24 @@ gm-brownfield-restoration/
 | Slope (flatness) | 0.908 | 0.924 | 0.534–0.999 |
 | **Total Risk** | **0.791** | **0.797** | **0.615–0.899** |
 
+**Feature Importance:**
+- **Site size (75%)** — Dominant predictor. Sites between 0.1–10 hectares are most suitable for restoration interventions
+- **Terrain flatness (13%)** — Flat sites (slope_risk > 0.8) correlate with former industrial land use
+- **Water/soil factors (<12%)** — Minimal additional predictive power once size and terrain are accounted for
+
+**Model Performance:**
+- Accuracy: 100% on test set (317 sites)
+- Perfect classification reflects use of synthetic target variable (rule-based suitability criteria)
+
 **Interpretation:**
 - **Water proximity** is the dominant risk driver (mean 0.85) — most sites are within 1–2km of watercourses
 - **Terrain** is consistently flat (mean slope risk 0.91), reflecting urban/industrial land use patterns
 - **Soil** shows moderate variation, with most sites on clay/loam soils (lower permeability)
+
+### Important Limitation
+The model uses a **synthetic target variable** (restoration suitability defined by deterministic rules) rather than real restoration outcome data. With access to historical records tracking which sites were successfully restored, this approach could be extended to build a genuine predictive model.
+
+The perfect accuracy demonstrates ML workflow proficiency but does not claim real-world predictive capability. See the [stakeholder explainer](https://dtcrompton.github.io/projects/brownfield/explainer.html) for a non-technical explanation of findings and limitations.
 
 ### Geographic Concentration
 
@@ -96,16 +114,16 @@ gm-brownfield-restoration/
 *Full table available in `outputs/figures/top10_highest_risk_sites.csv`*
 
 
-## Project Status
+## Project Phases
 
-**Phase 1: GEE Foundation COMPLETE**
+**Phase 1: GEE Foundation**
 - Study area definition (Greater Manchester bounding box: -2.7 to -1.95°E, 53.35 to 53.65°N)
 - UK brownfield register imported and filtered (1,585 active sites)
 - Environmental data layers integrated (land cover, watercourses, soil, terrain)
 - Composite risk score calculated for all sites
 - Data exported to CSV and GeoPackage formats
 
-**Phase 2: R Analysis COMPLETE**
+**Phase 2: R Analysis**
 - Statistical summary and risk categorisation
 - Distribution analysis and site rankings
 - Four publication-quality visualisations:
@@ -114,19 +132,19 @@ gm-brownfield-restoration/
   - Site size vs. risk scatter plot
   - Top 10 highest-risk sites chart
 
-**Phase 3: QGIS Cartography COMPLETE**
+**Phase 3: QGIS Cartography**
 - Professional map layout with legend, scale bar, north arrow
 - Risk-categorised sites (green/orange/red colour scheme)
 - High-resolution export (300 DPI) for portfolio and presentations
 
-**Phase 4: Python Extension COMPLETE**
+**Phase 4: Python Extension**
 - Web-based interactive map (Folium + GeoPandas)
 - Clickable markers with detailed site information
 - Layer control to toggle risk categories
 - Marker clustering and distance measurement tool
 - Standalone HTML file (no server required)
 
-**Phase 5: ML Extension (Planned)**
+**Phase 5: ML Extension**
 - Predictive model for ecological restoration success
 - Feature engineering from environmental and site characteristics
 - Model validation and performance metrics
@@ -135,9 +153,11 @@ gm-brownfield-restoration/
 
 ## Outputs
 
-**Interactive Map:** `outputs/maps/gm_brownfield_interactive.html` — open in any web browser
-
-**Static Map:** `outputs/maps/GM Brownfield Risk Map.png` — 300 DPI print-quality export
+- **Confusion matrix:** `outputs/figures/ml_confusion_matrix.png`
+- **Feature importance chart:** `outputs/figures/ml_feature_importance.png`
+- **Interactive web map:** [View map](https://dtcrompton.github.io/projects/brownfield/map.html)
+- **Full project write-up:** [Technical details](https://dtcrompton.github.io/projects/brownfield/index.html)
+- **Stakeholder explainer:** [Non-technical summary](https://dtcrompton.github.io/projects/brownfield/explainer.html)
 
 **Visualisations:**
 - `outputs/figures/risk_distribution.png`
@@ -149,6 +169,11 @@ gm-brownfield-restoration/
 - `outputs/figures/top10_highest_risk_sites.csv`
 - `outputs/maps/gm_brownfield_clipped.gpkg` — filtered sites with risk scores
 
+## Project Links
+
+**Portfolio:** [dtcrompton.github.io/projects/brownfield](https://dtcrompton.github.io/projects/brownfield/index.html)  
+**Interactive Map:** [View map](https://dtcrompton.github.io/projects/brownfield/map.html)  
+**Stakeholder Explainer:** [Non-technical summary](https://dtcrompton.github.io/projects/brownfield/explainer.html)
 
 ## Future Work
 
@@ -157,6 +182,10 @@ This project demonstrates a reproducible geospatial workflow applicable to other
 - Additional UK metropolitan areas with industrial heritage
 - Integration of historical contamination records where available
 - Habitat suitability modelling for specific bioremediation implementations
+- Use GBIF records to identify sites where natural recovery is already occurring
+- Estimate restoration costs vs. ecological benefits for prioritisation
+- Partner with restoration practitioners to track success/failure rates and build a genuinely predictive model
+- Interactive dashboard for councils/NGOs to filter and prioritise sites
 
 The methodology and codebase are designed to be adaptable for similar brownfield restoration analyses.
 
@@ -166,8 +195,6 @@ The methodology and codebase are designed to be adaptable for similar brownfield
 **Daniel Crompton**  
 MSc Computer Science & AI | MSc Quantity Surveying & Commercial Management  
 [LinkedIn](https://www.linkedin.com/in/dtcrompton/) | [GitHub](https://github.com/dtcrompton)
-
----
 
 ## Licence
 
